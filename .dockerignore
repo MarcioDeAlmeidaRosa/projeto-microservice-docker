@@ -1,4 +1,5 @@
 .gitignore
-review/
-movie/
-rotten-potatoes-ms/
+[Rr]eview/
+[Mm]ovie/
+[Rr]otten-potatoes-ms/
+[Nn]ode_modules/
