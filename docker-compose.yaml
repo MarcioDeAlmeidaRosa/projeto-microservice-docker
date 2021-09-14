@@ -1,0 +1,31 @@
+version: '3.9'
+
+services: 
+  
+  rotten_potatoes_ms_service:
+    image: rotten_potatoes_ms_service:1.0
+    build: 
+      context: ./rotten-potatoes-ms/src
+      dockerfile: Dockerfile
+    networks: 
+      - lb_solucao
+
+  movie_service:
+    image: movie_service:1.0
+    build: 
+      context: .
+      dockerfile: ./movie/src/Dockerfile
+    networks: 
+      - lb_solucao
+
+  review_service:
+    image: review_service:1.0
+    build: 
+      context: .
+      dockerfile: ./review/src/Dockerfile
+    networks: 
+      - lb_solucao
+
+networks: 
+  lb_solucao:
+    driver: bridge
