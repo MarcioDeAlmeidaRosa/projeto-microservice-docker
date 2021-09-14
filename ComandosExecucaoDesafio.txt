@@ -1,0 +1,94 @@
+	Exercícios
+		* Questão 01 - Execute os comandos para criar os 4 bancos de dados listados com containers, e use como se tivesse instalado eles localmente na sua máquina (Não esquece de garantir que não vai perder os dados caso o container seja excluido).
+
+			- MongoDB
+			  - imagem : https://hub.docker.com/_/mongo
+			  - comando: docker run --name db-mongo -e MONGO_INITDB_ROOT_USERNAME=root -e MONGO_INITDB_ROOT_PASSWORD=Senha@123! -v mongo-db-volume:/data/db -p 27017:27017 --network=nw-mongo-db -d mongo:5.0.1
+			  
+			- MariaDB
+			  - imagem : https://hub.docker.com/_/mariadb
+			  - comando: docker run --name db-mariadb -e MARIADB_ROOT_PASSWORD=Senha@123! -v maria-db-volume:/etc/mysql/conf.d -p 3306:3306 --network=nw-maria-db -d mariadb:10.6
+			  
+			- PostgreSQL
+			  - imagem : https://hub.docker.com/_/postgres
+			  - comando: docker run --name db-postgres -e POSTGRES_USER=root -e POSTGRES_PASSWORD=Senha@123! -e PGDATA=/var/lib/postgresql/data/pgdata -v postgre-volume:/var/lib/postgresql/data --network=nw-postgres -p 5432:5432 -d postgres:13.4-buster
+			  
+			- Redis
+			  - imagem : https://hub.docker.com/_/redis  |  https://redis.io/topics/config  |  https://redis.io/topics/lru-cache
+			  - comando: docker run --name cache-redis -v cache-redis-volume:/data -v cache-redis-cfg-volume:/usr/local/etc/redis --network=nw-redis-cache -p 6379:6379 -d redis:6.2.5-alpine redis-server --requirepass "Senha@123!"
+			  
+			  
+		* Questão 02 - Certo, você conseguiu criar 4 bancos na sua máquina utilizando containers. Mas tem uma coisa, não adianta só conectar a aplicação no banco quando se está desenvolvendo, é preciso também acessar o banco, executar comandos e consultar a base. Então vamos fazer isso da forma KubeDev de ser, com containers !!! Cada banco de dados tem uma ferramenta administrativa com interface web que você pode usar.
+			- MongoDB
+			  - cliente: https://hub.docker.com/_/mongo-express  |  https://github.com/mongo-express/mongo-express
+			  - comando: docker run --network=nw-mongo-db -e ME_CONFIG_MONGODB_SERVER=db-mongo -e ME_CONFIG_MONGODB_ADMINUSERNAME=root -e ME_CONFIG_MONGODB_ADMINPASSWORD=Senha%40123! -p 8081:8081 -d mongo-express:1.0.0-alpha
+			  
+			- MariaDB
+			  - cliente: https://hub.docker.com/_/phpmyadmin  |  https://www.phpmyadmin.net/  |  https://github.com/phpmyadmin/docker
+			  - comando: docker run --name myadmin -e MYSQL_ROOT_PASSWORD=Senha@123! -e PMA_HOST=db-mariadb -v phpmyadm-volume:/etc/phpmyadmin/config.user.inc.php --network=nw-maria-db -p 8080:80 -d phpmyadmin
+			  
+			- PostgreSQL
+			  - cliente: https://hub.docker.com/r/dpage/pgadmin4/  |  https://www.pgadmin.org/download/pgadmin-4-container/  |  https://www.pgadmin.org/  |  https://www.enterprisedb.com/postgres-tutorials/connecting-postgresql-using-psql-and-pgadmin
+			  - comando: docker run --name pgadmin -e PGADMIN_DEFAULT_EMAIL=marcio.almeida.rosa@gmail.com -e PGADMIN_DEFAULT_PASSWORD=Senha@123! -e PGADMIN_CONFIG_CONSOLE_LOG_LEVEL=10 --network=nw-postgres -p 8082:80 -d dpage/pgadmin4:5.6
+			  
+			- Redis
+			  - cliente: https://hub.docker.com/r/rediscommander/redis-commander
+			  - comando: docker run --name redis-commander -e HTTP_USER=root -e HTTP_PASSWORD=Senha@123! -e REDIS_HOST=cache-redis -e REDIS_PORT=6379 -e REDIS_PASSWORD=Senha@123! --network=nw-redis-cache -p 8083:8081 -d rediscommander/redis-commander
+			  
+			  
+		* Questão 03 - Um dos fundamentos chave pra se trabalhar com container é a criação de imagens Docker. E criar uma imagem Docker pra cada aplicação sempre muda dependendo de como ela foi desenvolvida. Um cliente entrou em contato e expos o principal problema para a migração pra ambiente baseado em containers. Então agora eu tenho aqui algumas aplicações que precisam ser executadas em containers mas eu só tenho o código fonte delas, chegou a hora de você mostrar seu talento e executar essas aplicações em containers Docker e deixar acessível na sua máquina local.(Pesquise e entenda como cada plataforma é utilizada antes de começar a criar a imagem)
+
+			- App Node
+			  - repositório   : https://github.com/KubeDev/conversao-temperatura
+			  - fork          : https://github.com/MarcioDeAlmeidaRosa/conversao-temperatura
+			  - referências   : https://vsupalov.com/docker-env-vars/  | https://nodejs.dev/learn/how-to-read-environment-variables-from-nodejs
+			  - comando build : docker build --build-arg ARG_NODE_PORT=8080 -t marcioalmeidarosa/conversao-temperatura:1.0 .
+			  - comando run   : docker run --name=api_conversao-temperatura_node --env-file ./.env -p 8080:8070 -d marcioalmeidarosa/conversao-temperatura:1.0
+			  			  
+			- App Python
+			  - repositório   : https://github.com/KubeDev/conversao-distancia
+			  - fork          : https://github.com/MarcioDeAlmeidaRosa/conversao-distancia
+			  - referências   : https://www.howtogeek.com/225487/what-is-the-difference-between-127.0.0.1-and-0.0.0.0/#:~:text=0.0%3F-,127.0.,particular%20address'%20place%20holder).
+			  - com instal pkg: pip install -r requirements.txt
+			  - executar app  : python app.py
+			  - comando build : docker build -t marcioalmeidarosa/conversao-distancia:1.0 .
+			  - comando run   : docker run --name=api_conversao-distancia_python -p 8099:5000 -d marcioalmeidarosa/conversao-distancia:1.0
+			  
+			- App C#
+			  - repositório   : https://github.com/KubeDev/conversao-peso
+			  - fork          : https://github.com/MarcioDeAlmeidaRosa/conversao-peso
+			  - sdk           : https://hub.docker.com/_/microsoft-dotnet-sdk
+			  - comando build : docker build -t marcioalmeidarosa/conversao-peso:1.0 .
+			  - comando run   : docker run -it marcioalmeidarosa/conversao-peso:1.0 /bin/bash
+			  
+			  
+		* Questão 04 - Agora que você já afiou o seu conhecimento sobre criação de imagens Docker, tá na hora de fazer o deploy de uma aplicação 100% em containers Docker. A aplicação está no GitHub do KubeDev e um detalhe MUITO importante, a aplicação precisa ser toda criada com apenas uma linha de comando.
+			  - repositório   : https://github.com/KubeDev/rotten-potatoes
+			  - fork          : https://github.com/MarcioDeAlmeidaRosa/rotten-potatoes
+			  - com instal pkg: pip install -r requirements.txt
+			  - executar app  : python app.py
+			  - comando build : docker build -t marcioalmeidarosa/rotten-potatoes:1.0 .
+			  - comando run   : docker run -it -p 8050:5000 -d marcioalmeidarosa/rotten-potatoes:1.0
+			  - compose up    : docker-compose -f .\src\docker-compose.yaml up -d
+
+			  
+		* Questão 05 - Chegou um cliente pra você que possui todas as suas aplicações em data centers e a gestão dessas aplicações está cada vez mais complexa então pra iniciar um plano de gestão unificada e migração pra um ambiente cloud, as aplicações serão migradas pra containers. E hoje você precisa iniciar esse processo com um projeto piloto, o portal de conteúdos da empresa construido em Wordpress. Então hoje sua missão é criar esse ambiente wordpress pronto para a equipe de publicidade começar a popular.
+			  - repositório   : https://github.com/MarcioDeAlmeidaRosa/portal-empresa		
+
+
+		* Questão 06 - Agora vamos aumentar mais a complexidade das coisas, chegou a hora de executar uma aplicação baseada em arquitetura de microsserviços. Essa aplicação é formada por 3 repositórios:
+			- Aplicação Web
+              - repositório   : https://github.com/KubeDev/rotten-potatoes-ms
+			  - fork          : https://github.com/MarcioDeAlmeidaRosa/rotten-potatoes-ms
+			  
+			- Microsservico de Filmes
+              - repositório   : https://github.com/KubeDev/movie
+			  - fork          : https://github.com/MarcioDeAlmeidaRosa/movie
+			  
+			- Microsserviço de Avaliação
+              - repositório   : https://github.com/KubeDev/review
+			  - fork          : https://github.com/MarcioDeAlmeidaRosa/review
+			  
+			  - repositório   : https://github.com/MarcioDeAlmeidaRosa/projeto-microservice-docker
+		
+		* Questão 07 - Agora que você concluiu, tão importante quanto executar, é documentar. Então crie anotações sobre cada questão, detalhe as tomadas de decisão e processo de construção. E pra ficar melhor ainda, crie posts no Linkedin sobre o processo e não se esquece de me marcar e colocar a nossa #rumoaelite !!!!
