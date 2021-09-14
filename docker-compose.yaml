@@ -16,7 +16,6 @@ services:
     ports: 
       - 8066:5000
     depends_on: 
-      - pg_db_service
       - movie_service
       - review_service
 
@@ -26,10 +25,16 @@ services:
     build: 
       context: ./movie/src/
       dockerfile: Dockerfile
+    environment: 
+      - MONGODB_URI=mongodb://mongouser:mongopwd@mongo_db_service:27017/admin
     networks: 
       - lb_solucao
+      - db
     ports: 
-      - 8081:8081
+      - 8181:8181
+    depends_on: 
+      - mongo_db_service
+    restart: always
 
   review_service:
     image: review_service:1.0
@@ -52,6 +57,14 @@ services:
     environment: 
       - POSTGRES_USER=pguser
       - POSTGRES_PASSWORD=Pg@123
+    networks: 
+      - db
+
+  mongo_db_service:
+    image: mongo:5.0
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongouser
+      - MONGO_INITDB_ROOT_PASSWORD=mongopwd
     networks: 
       - db
 
