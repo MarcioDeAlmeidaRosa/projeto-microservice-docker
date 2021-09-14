@@ -9,8 +9,8 @@ services:
       context: ./rotten-potatoes-ms/src
       dockerfile: Dockerfile
     environment: 
-      - MOVIE_SERVICE_URI=movie_service
-      - REVIEW_SERVICE_URI=review_service
+      - MOVIE_SERVICE_URI=http://movie_service:8181
+      - REVIEW_SERVICE_URI=http://review_service:80
     networks: 
       - lb_solucao
     ports: 
@@ -29,9 +29,7 @@ services:
       - MONGODB_URI=mongodb://mongouser:mongopwd@mongo_db_service:27017/admin
     networks: 
       - lb_solucao
-      - db
-    ports: 
-      - 8181:8181
+      - app
     depends_on: 
       - mongo_db_service
     restart: always
@@ -46,11 +44,10 @@ services:
       - ConnectionStrings__MyConnection=Host=pg_db_service;Database=pguser;Username=pguser;Password=Pg@123;
     networks: 
       - lb_solucao
-      - db
-    ports: 
-      - 8282:8282
+      - app
     depends_on: 
       - pg_db_service
+    restart: always
 
   pg_db_service:
     image: postgres:13.4-alpine
@@ -58,7 +55,7 @@ services:
       - POSTGRES_USER=pguser
       - POSTGRES_PASSWORD=Pg@123
     networks: 
-      - db
+      - app
 
   mongo_db_service:
     image: mongo:5.0
@@ -66,10 +63,10 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=mongouser
       - MONGO_INITDB_ROOT_PASSWORD=mongopwd
     networks: 
-      - db
+      - app
 
 networks: 
   lb_solucao:
     driver: bridge
-  db:
+  app:
     driver: bridge
