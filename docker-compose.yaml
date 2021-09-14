@@ -27,11 +27,24 @@ services:
     image: review_service:1.0
     hostname: review_service
     build: 
-      context: .
-      dockerfile: ./review/src/Dockerfile
+      context: ./review/src/Review.Web
+      dockerfile: Dockerfile
+    environment: 
+      - ConnectionStrings__MyConnection=Host=pg_db_service;Database=pguser;Username=pguser;Password=Pg@123;
     networks: 
       - lb_solucao
+      - db
+
+  pg_db_service:
+    image: postgres:13.4-alpine
+    environment: 
+      - POSTGRES_USER=pguser
+      - POSTGRES_PASSWORD=Pg@123
+    networks: 
+      - db
 
 networks: 
   lb_solucao:
+    driver: bridge
+  db:
     driver: bridge
