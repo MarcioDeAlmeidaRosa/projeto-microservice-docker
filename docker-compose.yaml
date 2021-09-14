@@ -13,6 +13,12 @@ services:
       - REVIEW_SERVICE_URI=review_service
     networks: 
       - lb_solucao
+    ports: 
+      - 8066:5000
+    depends_on: 
+      - pg_db_service
+      - movie_service
+      - review_service
 
   movie_service:
     image: movie_service:1.0
@@ -22,6 +28,8 @@ services:
       dockerfile: Dockerfile
     networks: 
       - lb_solucao
+    ports: 
+      - 8081:8081
 
   review_service:
     image: review_service:1.0
@@ -34,6 +42,10 @@ services:
     networks: 
       - lb_solucao
       - db
+    ports: 
+      - 8282:8282
+    depends_on: 
+      - pg_db_service
 
   pg_db_service:
     image: postgres:13.4-alpine
